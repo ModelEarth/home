@@ -40,60 +40,6 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }
 
- 
-
-function renderResults1() {
-  resultsContainer.innerHTML = '';
-  items.forEach((item) => {
-    const li = document.createElement('li');
-    li.textContent = item.title;
-    li.className = 'autocomplete-item';
-    li.addEventListener('click', async () => {
-      input.value = item.title;
-      globalAddress = item.address;
-      zip = item.zip || "";  // added zip code
-      country = item.country || ""; // added country name
-      
-      console.log('Selected item', item);
-
-
-
-
-      // Use OpenStreetMap (Nominatim) to get lat/lon for the selected address
-      try {
-        const response = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(item.title)}&format=json&limit=1`);
-        const data = await response.json();
-        if (data.length > 0) {
-          const location = data[0];
-          console.log(`Latitude: ${location.lat}, Longitude: ${location.lon}`);
-          
-
-          requestsDiv.innerHTML = `
-          <b>City:</b> ${item.address.city || 'N/A'}<br>
-          <b>Country:</b> ${item.address.countryName || 'N/A'}<br>
-          <b>Postal Code:</b> ${item.address.postalCode || 'N/A'}<br>
-          <b>State:</b> ${item.address.state || 'N/A'}<br>
-          <b>Formatted Address:</b> ${item.address.label || 'N/A'}<br>
-          <b>Latitude:</b> ${location.lat}<br>
-          <b>Longitude:</b> ${location.lon}
-        `;
-  
-         // requestsDiv.innerHTML = `Address: ${globalAddress}<br>Latitude: ${location.lat}, Longitude: ${location.lon}<br>ZIP: ${zip}`; 
-         
-          // Update the requestsDiv with latitude and longitude from Nominatim
-         // requestsDiv.innerHTML = `Address: ${globalAddress}<br>Latitude: ${location.lat}, Longitude: ${location.lon}`;
-        } else {
-          console.log('No lat/lon found for this address');
-        }
-      } catch (error) {
-        console.error('Error fetching lat/lon:', error);
-      }
-
-      resultsContainer.innerHTML = '';
-    });
-    resultsContainer.appendChild(li);
-  });
-}
 
 function renderResults() {
   resultsContainer.innerHTML = '';
@@ -122,15 +68,19 @@ function renderResults() {
           console.log(`Latitude: ${location.lat}, Longitude: ${location.lon}`);
 
           // Display address details with lat/lon
-          requestsDiv.innerHTML = `
-            <b>City:</b> ${item.address.city || 'N/A'}<br>
-            <b>Country:</b> ${item.address.countryName || 'N/A'}<br>
-            <b>Postal Code:</b> ${item.address.postalCode || 'N/A'}<br>
-            <b>State:</b> ${item.address.state || 'N/A'}<br>
-            <b>Formatted Address:</b> ${item.address.label || 'N/A'}<br>
-            <b>Latitude:</b> ${location.lat}<br>
-            <b>Longitude:</b> ${location.lon}
-          `;
+          let addressDetails = '';
+
+          if (item.address.city) addressDetails += `<b>City:</b> ${item.address.city}<br>`;
+          if (item.address.countryName) addressDetails += `<b>Country:</b> ${item.address.countryName}<br>`;
+          if (item.address.postalCode) addressDetails += `<b>Postal Code:</b> ${item.address.postalCode}<br>`;
+          if (item.address.state) addressDetails += `<b>State:</b> ${item.address.state}<br>`;
+          if (item.address.label) addressDetails += `<b>Formatted Address:</b> ${item.address.label}<br>`;
+          if (location) {
+            addressDetails += `<b>Latitude:</b> ${location.lat}<br>`;
+            addressDetails += `<b>Longitude:</b> ${location.lon}<br>`;
+          }
+
+          requestsDiv.innerHTML = addressDetails;
         } else {
           console.log('No lat/lon found for this address');
           requestsDiv.innerHTML = `
