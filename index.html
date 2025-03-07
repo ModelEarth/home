@@ -449,7 +449,8 @@ Add a swoop like: https://contra.com/p/cRk36Noe-humify-website-design
           <option value="geoId/72">Puerto Rico</option>
       </select>
 
-      <select id="chartVariable"></select>
+      <div style="clear:both"></div>
+      <select id="chartVariable" ></select>
     </div>
 
     <br>
@@ -587,7 +588,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // State menu change
     document.getElementById('entityId').addEventListener('change', (event) => {
         entityId = event.target.value;
-        scope = "counties"
+        //scope = "counties"
 
         refreshTimeline();
 
