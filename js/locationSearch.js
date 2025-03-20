@@ -62,46 +62,31 @@ function renderResults() {
       const searchQuery = `${item.address.city}, ${item.address.state}, ${item.address.postalCode}`; // Simplified query
       console.log(`Searching lat/lon for: ${searchQuery}`);
       
-      //try {
-        const response = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(searchQuery)}&format=json&limit=1`);
-        const data = await response.json();
-        let addressDetails = '';
-        if (item.address.city) addressDetails += `<b>City:</b> ${item.address.city}<br>`;
-        if (item.address.countryName) addressDetails += `<b>Country:</b> ${item.address.countryName}<br>`;
-        if (item.address.postalCode) addressDetails += `<b>Postal Code:</b> ${item.address.postalCode}<br>`;
-        if (item.address.state) addressDetails += `<b>State:</b> ${item.address.state}<br>`;
-        if (item.address.label != item.address.countryName) {
-          if (item.address.label) addressDetails += `<b>Formatted Address:</b> ${item.address.label}<br>`;
-          addressLabel = item.address.label;
-        }
-
-        if (data.length > 0) {
-          const location = data[0];
-          console.log(`Latitude: ${location.lat}, Longitude: ${location.lon}`);
-
-          // Display address details with lat/lon
-          if (location) {
-            addressDetails += `<b>Latitude:</b> ${location.lat}<br>`;
-            addressDetails += `<b>Longitude:</b> ${location.lon}<br>`;
-          }
-        } else {
-          console.log('No lat/lon found for this address.');
-        }
-        requestsDiv.innerHTML = addressDetails;
-      /*
-      } catch (error) {
-        console.error('Error fetching lat/lon:', error);
-        requestsDiv.innerHTML = `
-          <b>City:</b> ${item.address.city || 'N/A'}<br>
-          <b>Country:</b> ${item.address.countryName || 'N/A'}<br>
-          <b>Postal Code:</b> ${item.address.postalCode || 'N/A'}<br>
-          <b>State:</b> ${item.address.state || 'N/A'}<br>
-          <b>Formatted Address:</b> ${item.address.label || 'N/A'}<br>
-          <b>Latitude:</b> Error fetching<br>
-          <b>Longitude:</b> Error fetching
-        `;
+      const response = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(searchQuery)}&format=json&limit=1`);
+      const data = await response.json();
+      let addressDetails = '';
+      if (item.address.city) addressDetails += `<b>City:</b> ${item.address.city}<br>`;
+      if (item.address.countryName) addressDetails += `<b>Country:</b> ${item.address.countryName}<br>`;
+      if (item.address.postalCode) addressDetails += `<b>Postal Code:</b> ${item.address.postalCode}<br>`;
+      if (item.address.state) addressDetails += `<b>State:</b> ${item.address.state}<br>`;
+      if (item.address.label != item.address.countryName) {
+        if (item.address.label) addressDetails += `<b>Formatted Address:</b> ${item.address.label}<br>`;
+        addressLabel = item.address.label;
       }
-      */
+
+      if (data.length > 0) {
+        const location = data[0];
+        console.log(`Latitude: ${location.lat}, Longitude: ${location.lon}`);
+
+        // Display address details with lat/lon
+        if (location) {
+          addressDetails += `<b>Latitude:</b> ${location.lat}<br>`;
+          addressDetails += `<b>Longitude:</b> ${location.lon}<br>`;
+        }
+      } else {
+        console.log('No lat/lon found for this address.');
+      }
+      requestsDiv.innerHTML = addressDetails;
 
       resultsContainer.innerHTML = ''; // Clear the autocomplete suggestions
     });
