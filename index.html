@@ -283,7 +283,7 @@ input:focus{
     width: 100%;
   }
 }
-.half-div a {
+.half-divREMOVE a {
     position: absolute;
     top: 0;
     left: 0;
@@ -291,6 +291,15 @@ input:focus{
     height: 100%;
     text-decoration: none;
     z-index: 1; /* Ensure the link covers the div content */
+}
+.half-div a {
+    text-decoration: none;
+    color: #fff;
+}
+@media (max-width: 1400px) {
+  .half-div a {
+    font-size: 18px;
+  }
 }
 .div1 {
     background-color: rgb(152, 139, 252); /* Purple */
@@ -342,17 +351,17 @@ Add a swoop like: https://contra.com/p/cRk36Noe-humify-website-design
 
 
 <div id="toptextinfo">
-  <div style="font-size:23px; " class="half-div div2">
+  <div style="font-size:22px; " class="half-div div2">
   DreamStudio provides an open framework for location data visualizations, comparisons and forecasting focused on realworld problem&nbsp;solving.
   <!-- developed by computer science grads focused on creating integrated apps -->
   </div>
 
   <div style="font-size:20px; font-weight: normal; justify-content: left;" class="half-div div1">
   <b>Our Development Areas</b><br>
-  RealityStream (ML&nbsp;Visualization)<br>
-  ModelEarth (Location&nbsp;Analysis)<br>
-  OpenFootprint (Open&nbsp;Data&nbsp;Panels)<br>
-  MemberSense (Team&nbsp;Perspectives)<br>
+  <a href="/RealityStream/">RealityStream (ML&nbsp;Visualization)</a><br>
+  <a href="/community/">ModelEarth (Location&nbsp;Analysis)</a><br>
+  <a href="/profile/">OpenFootprint (Open&nbsp;Data&nbsp;Panels)</a><br>
+  <a href="/feed/members/">MemberSense (Team&nbsp;Perspectives)</a><br>
 
   </div>
 </div>
