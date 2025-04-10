@@ -407,20 +407,81 @@ Add a swoop like: https://contra.com/p/cRk36Noe-humify-website-design
     Style above is not used there.
     -->
 
+<div id="timeline-nav" style="margin-bottom: 8px; font-family: Arial, sans-serif;"><!-- Links are populated here --></div>
+  
+  <script>
+    function updateTimelineNav() {
+      // Define all goals with their display names
+      const goals = [
+        { goal: "air", name: "Emissions" },
+        { goal: "health", name: "Health" },
+        { goal: "jobs", name: "Jobs", extra: "&scope=state" },
+        { goal: "economy", name: "Economy" },
+        { goal: "biodiverse", name: "Biodiversity" },
+        { goal: "population", name: "Population" }
+      ];
+  
+      // Get the current goal from the hash
+      const hash = window.location.hash;
+      const goalMatch = hash.match(/goal=([^&]+)/);
+      const currentGoal = goalMatch ? goalMatch[1] : "air"; // Default to "air"
+  
+      // Find the active goal object
+      const activeGoal = goals.find(g => g.goal === currentGoal) || goals[0];
+      //const inactiveGoals = goals.filter(g => g.goal !== currentGoal);
+  
+      const allGoals = goals;
+
+      // Clear the container
+      const container = document.getElementById('timeline-nav');
+      container.innerHTML = '';
+  
+      // Add the active goal first as "Timeline"
+      const activeElement = document.createElement('span');
+      activeElement.innerHTML = `<b>${activeGoal.name} Timeline</b>`;
+      //container.appendChild(activeElement);
+  
+      // Add the goals as links
+      allGoals.forEach((goal, index) => {
+        // Only add separator if not the first item
+        if (index > 0) {
+            const separator = document.createTextNode(' | ');
+            container.appendChild(separator);
+        }
+        
+        if (goal.goal === currentGoal) {
+            // Make current goal bold instead of linking it
+            const boldText = document.createElement('b');
+            boldText.textContent = goal.name;
+            boldText.style.marginLeft = '2px';
+            boldText.style.marginRight = '2px';
+            container.appendChild(boldText);
+        } else {
+            // Create link for other goals
+            const link = document.createElement('a');
+            link.href = `#goal=${goal.goal}${goal.extra || ''}`;
+            link.textContent = goal.name;
+            link.style.marginLeft = '2px';
+            link.style.marginRight = '2px';
+            link.style.textDecoration = 'none';
+            link.style.color = '#0066cc';
+            link.className = 'timeline-link';
+            container.appendChild(link);
+        }
+      });
+    }
+  
+    // Run on load and hash change
+    document.addEventListener('DOMContentLoaded', updateTimelineNav);
+    window.addEventListener('hashchange', updateTimelineNav);
+  </script>
+
+
     <!--
     <div id="relocatedStateMenu" style="float:left"></div>
     -->
 
     <div class="hideMobile"><!-- until eCharts adjusted for mobile -->
-
-    <div style="float:right">
-      <div id="airTimelinesLink" style="display:none;">
-      <b>Health Timelines</b> | View <a href="#goal=air">Emissions Timelines</a>
-      </div>
-      <div id="healthTimelinesLink">
-      <b>Emissions Timelines</b> | View <a href="#goal=health">Health Timelines</a>
-      </div>
-    </div>
 
     <div style="overflow:visible;">
       <div id="relocatedScopeMenu" style="float:left"></div>
@@ -480,8 +541,7 @@ Add a swoop like: https://contra.com/p/cRk36Noe-humify-website-design
           <option value="geoId/72">Puerto Rico</option>
       </select>
 
-      <div style="clear:both"></div>
-      <select id="chartVariable" ></select>
+      <select id="chartVariable" style="max-width:400px;"></select>
     </div>
 
     <br>
