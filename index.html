@@ -14,7 +14,7 @@ param.website = "dreamstudio"
 </script>
 
 <link type="text/css" rel="stylesheet" href="/localsite/css/base.css" id="/localsite/css/base.css" />
-<script type="text/javascript" src="/localsite/js/localsite.js?showheader=true"></script>
+<script type="text/javascript" src="/localsite/js/localsite.js?showheader=true&scope=country"></script>
 
 <script src="js/locationSearch.js"></script>
 
@@ -544,11 +544,31 @@ Add a swoop like: https://contra.com/p/cRk36Noe-humify-website-design
     </div>
 
     <br>
-    <div class="whichLinesHolder">
-      <label> <input value="showAll" type="radio" name="whichLines" />All </label>
-      <label> <input value="showTop5" type="radio" name="whichLines" checked />Top 5 </label>
-      <label> <input value="showBottom5" type="radio" name="whichLines" />Bottom 5 </label>
+
+    <div style="overflow: auto;">
+      <div class="whichLinesHolder" style="float:left">
+        <label> <input value="showAll" type="radio" name="whichLines" />All </label>
+        <div style="display:none" class="scope-country">
+            <label> <input value="showSelected" type="radio" name="whichLines"/>11 Countries </label>
+        </div>
+        <div style="display:none" class="local">
+          <div style="display:none" class="scope-country">
+              <a id="countryListLink" href="#geoview=countries" onclick="handleCountryListClick()">Country List</a>
+          </div>
+        </div>
+        <label> <input value="showTop5" type="radio" name="whichLines" checked />Top 5 </label>
+        <label> <input value="showBottom5" type="radio" name="whichLines" />Bottom 5 </label>
+      </div>
+
+      <div id="perCapitaOptions" style="float:right">
+          <label> <input value="totals" type="radio" name="whichPer" checked  />Totals </label>
+          <label> <input value="percapita" type="radio" name="whichPer" />Per Capita </label>
+          <!--
+          <label> <input value="perarea" type="radio" name="whichPer" />Per Area </label>
+          -->
+      </div>
     </div>
+
     <div id="div1" class="toggleDiv">
         <canvas id="timelineChart"></canvas>
     </div>
@@ -677,12 +697,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // State menu change
     document.getElementById('entityId').addEventListener('change', (event) => {
-        entityId = event.target.value;
-        //scope = "counties"
-
+        //entityId = event.target.value;
         refreshTimeline();
-
-        //getTimelineChart(scope, chartVariable, entityId, showAll, chartText);
+    });
+    document.querySelectorAll('input[name="whichPer"]').forEach((radio) => {
+        radio.addEventListener('change', () => {
+            refreshTimeline(); // This will re-fetch emissions and population and update the chart
+        });
     });
 });
 
