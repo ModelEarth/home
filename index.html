@@ -389,8 +389,20 @@ Add a swoop like: https://contra.com/p/cRk36Noe-humify-website-design
         <ul id="autocomplete-results" class="autocomplete-results"></ul>
       </div>
 
+      <!-- Natural Language Search Options (only visible on localhost) -->
+      <div id="nl-search-section" style="margin-top: 12px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+        <button id="gemini-nl-btn" class="nl-search-btn" style="background-color: #4285F4; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: 14px;">
+          Gemini Insights
+        </button>
+        <button id="claude-nl-btn" class="nl-search-btn" style="background-color: #6B7280; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: 14px;">
+          Claude Insights
+        </button>
+        <span style="font-size: 12px; color: #666;">Use AI to understand location data and get insights</span>
+      </div>
+
       <br>
       <div id="requests" style="margin-bottom:15px"></div>
+      <div id="nl-search-results" style="margin-top: 12px; padding: 12px; background-color: #f5f5f5; border-radius: 8px; display: none;"></div>
     </div>
 
     <!--
@@ -637,6 +649,222 @@ document.addEventListener("DOMContentLoaded", function() {
     if (location.host.indexOf('localhost') >= 0 && window.location.hostname !== 'dreamstudio.com') {
       waitForElm('.goalsSub').then((elm) => {
         toggleDiv('.goalsSub');
+      });
+      // Show search section on localhost
+      const heroSearch = document.getElementById('heroSearch');
+      if (heroSearch) {
+        heroSearch.style.display = 'block';
+      }
+    }
+
+    // Natural Language Search functionality (shared with team/projects/index.html)
+    const GEMINI_API_BASE = 'http://localhost:8081/api';
+    const geminiBtn = document.getElementById('gemini-nl-btn');
+    const claudeBtn = document.getElementById('claude-nl-btn');
+    const nlResultsDiv = document.getElementById('nl-search-results');
+    const autocompleteInput = document.getElementById('autocomplete-input');
+
+    // Helper function to get location context from the search input
+    function getLocationContext() {
+        const inputValue = autocompleteInput ? autocompleteInput.value.trim() : '';
+        const requestsDiv = document.getElementById('requests');
+        const requestsContent = requestsDiv ? requestsDiv.innerHTML : '';
+        
+        return {
+            searchQuery: inputValue,
+            addressDetails: requestsContent,
+            hasLocation: inputValue.length > 0
+        };
+    }
+
+    // Gemini Insights handler
+    if (geminiBtn) {
+        geminiBtn.addEventListener('click', async () => {
+            const context = getLocationContext();
+            
+            if (!context.hasLocation) {
+                nlResultsDiv.innerHTML = '<div style="color: #d32f2f; padding: 8px;">Please enter a location in the search field above first.</div>';
+                nlResultsDiv.style.display = 'block';
+                return;
+            }
+
+            geminiBtn.disabled = true;
+            geminiBtn.textContent = 'Processing...';
+            nlResultsDiv.style.display = 'block';
+            nlResultsDiv.innerHTML = '<div style="padding: 12px;">🔄 Analyzing location with Gemini AI...</div>';
+
+            try {
+                const prompt = `You are analyzing location data for a data visualization and analysis platform.
+
+**Location Search Query:** "${context.searchQuery}"
+
+**Address Details:**
+${context.addressDetails || 'No additional address details available'}
+
+Please provide insights about this location, including:
+1. What type of location data and visualizations might be relevant here
+2. What environmental, economic, or social metrics would be interesting to explore
+3. Suggestions for related locations or comparisons that might be valuable
+4. Any data science or visualization opportunities for this location
+
+Format your response in a clear, structured way that helps users understand what they can do with this location data.`;
+
+                const response = await fetch(`${GEMINI_API_BASE}/gemini/analyze`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        prompt: prompt
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const result = await response.json();
+
+                if (result.success && result.analysis) {
+                    nlResultsDiv.innerHTML = `
+                        <h4 style="margin-top: 0;">🤖 Gemini AI Location Insights</h4>
+                        <div style="white-space: pre-wrap; line-height: 1.6; margin-bottom: 8px;">${result.analysis}</div>
+                        <p style="font-size: 0.85rem; color: #666; margin: 0;">
+                            <strong>Location:</strong> ${context.searchQuery}
+                        </p>
+                    `;
+                } else {
+                    throw new Error(result.error || 'Analysis failed');
+                }
+
+            } catch (error) {
+                console.error('Gemini API error:', error);
+                const isConnectionError = error.message.includes('fetch') || 
+                                        error.message.includes('NetworkError') || 
+                                        error.message.includes('Failed to fetch');
+                
+                if (isConnectionError) {
+                    nlResultsDiv.innerHTML = `
+                        <div style="color: #92400E; background: #FEF3C7; padding: 12px; border-radius: 4px;">
+                            <strong>⚠️ Connection Error</strong><br>
+                            The Gemini API requires the Rust backend server to be running.<br>
+                            <small>Start the server with "start rust" to enable AI-powered location insights.</small>
+                        </div>
+                    `;
+                } else {
+                    nlResultsDiv.innerHTML = `
+                        <div style="color: #d32f2f; padding: 12px;">
+                            <strong>Error:</strong> ${error.message || 'Unknown error occurred'}
+                        </div>
+                    `;
+                }
+            } finally {
+                geminiBtn.disabled = false;
+                geminiBtn.textContent = 'Gemini Insights';
+            }
+        });
+    }
+
+    // Claude Insights handler
+    if (claudeBtn) {
+        claudeBtn.addEventListener('click', async () => {
+            const context = getLocationContext();
+            
+            if (!context.hasLocation) {
+                nlResultsDiv.innerHTML = '<div style="color: #d32f2f; padding: 8px;">Please enter a location in the search field above first.</div>';
+                nlResultsDiv.style.display = 'block';
+                return;
+            }
+
+            claudeBtn.disabled = true;
+            claudeBtn.textContent = 'Processing...';
+            nlResultsDiv.style.display = 'block';
+            nlResultsDiv.innerHTML = '<div style="padding: 12px;">🔄 Analyzing location with Claude AI...</div>';
+
+            try {
+                const prompt = `You are analyzing location data for a data visualization and analysis platform.
+
+**Location Search Query:** "${context.searchQuery}"
+
+**Address Details:**
+${context.addressDetails || 'No additional address details available'}
+
+Please provide insights about this location, including:
+1. What type of location data and visualizations might be relevant here
+2. What environmental, economic, or social metrics would be interesting to explore
+3. Suggestions for related locations or comparisons that might be valuable
+4. Any data science or visualization opportunities for this location
+
+Format your response in a clear, structured way that helps users understand what they can do with this location data.`;
+
+                const response = await fetch(`${GEMINI_API_BASE}/claude/analyze`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        prompt: prompt,
+                        dataset_info: {
+                            record_count: 0,
+                            filtered_count: 0,
+                            sample_data: [],
+                            headers: [],
+                            sort_info: {
+                                column: null,
+                                order: null
+                            },
+                            filter_info: {
+                                status_filter: null,
+                                team_filter: null,
+                                group_filter: false
+                            }
+                        }
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const result = await response.json();
+
+                if (result.success && result.analysis) {
+                    nlResultsDiv.innerHTML = `
+                        <h4 style="margin-top: 0;">🤖 Claude AI Location Insights</h4>
+                        <div style="white-space: pre-wrap; line-height: 1.6; margin-bottom: 8px;">${result.analysis}</div>
+                        <p style="font-size: 0.85rem; color: #666; margin: 0;">
+                            <strong>Location:</strong> ${context.searchQuery}
+                        </p>
+                    `;
+                } else {
+                    throw new Error(result.error || 'Analysis failed');
+                }
+
+            } catch (error) {
+                console.error('Claude API error:', error);
+                const isConnectionError = error.message.includes('fetch') || 
+                                        error.message.includes('NetworkError') || 
+                                        error.message.includes('Failed to fetch');
+                
+                if (isConnectionError) {
+                    nlResultsDiv.innerHTML = `
+                        <div style="color: #92400E; background: #FEF3C7; padding: 12px; border-radius: 4px;">
+                            <strong>⚠️ Connection Error</strong><br>
+                            The Claude API requires the Rust backend server to be running.<br>
+                            <small>Start the server with "start rust" to enable AI-powered location insights.</small>
+                        </div>
+                    `;
+                } else {
+                    nlResultsDiv.innerHTML = `
+                        <div style="color: #d32f2f; padding: 12px;">
+                            <strong>Error:</strong> ${error.message || 'Unknown error occurred'}
+                        </div>
+                    `;
+                }
+            } finally {
+                claudeBtn.disabled = false;
+                claudeBtn.textContent = 'Claude Insights';
+            }
       });
     }
 });
