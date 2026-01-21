@@ -2,4 +2,4 @@
 
 [Our Data Science Team](https://dreamstudio.com/earth) is comprised of recent computer science graduates, coding volunteers sharpening their skills, and IT professionals focused on open source development. We're&nbsp;available to help your organization implement interactive visualizations, [collaborative partner tools](../inspire/) and machine learning analytics using open source Git repos with Google CoLabs and Data Commons, Exiobase trade flow and census data. Our pages and charts are static, and thus, easily embedded into multiple websites. We're contributing to Open Footprint frontends that allow yaml impact profiles to be shared along with public-facing data dashboards using Observable D3, Chart.js, Apache eCharts, Plotly and Seaborn, combined with our RealityStream models, including Support Vector Machines<!-- (SVM)-->, PyTorch Neural Networks with Multi Layer Perceptron (MLP), Random Forests and XGBoost. [Join&nbsp;our&nbsp;weekly&nbsp;meetups](/io/coders) and chart your&nbsp;future!
 
-&copy; 2025 DreamStudio - Collaborative&nbsp;Data&nbsp;Science
+&copy; 2026 DreamStudio - Collaborative&nbsp;Data&nbsp;Science
