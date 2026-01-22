@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (!inputValue) return;
     loading.style.display = 'block';
     try {
-      const response = await fetch(`https://autocomplete.search.hereapi.com/v1/autocomplete?apiKey=14B6Yr62CTa_mKKoYViJQClxjjA32S6pL4Ir2ehCMcY&q=${inputValue}&maxresults=8`);
+      const response = await fetch(`https://autocomplete.search.hereapi.com/v1/autocomplete?apiKey=fqe1Boy0RrwDPIXwzutkFL5Ljo0QJJT6Xb-KoehiUe0&q=${inputValue}&maxresults=8`);
       const data = await response.json();
       console.log('data.items line 17', data.items)
       items = data.items.map(item => ({
