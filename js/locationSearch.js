@@ -164,7 +164,7 @@ function renderResults() {
     if (!promptForURL) {
       promptForURL = country;
     }
-    window.location.href = "/planet/LangChainJSApp/#prompt=" + promptForURL;
+    window.location.href = "https://chatgpt.com/?prompt=" + promptForURL;
   });
 });
 
