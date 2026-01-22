@@ -195,6 +195,43 @@ param.website = "dreamstudio"
 input:focus{
   outline: none;
 }
+
+/* Dark mode styles */
+.dark .autocomplete-container {
+    background-color: #2a2a2a;
+    border-color: #666;
+}
+.dark .autocomplete-container .autocomplete-input {
+    color: #e0e0e0;
+}
+.dark .autocomplete-container .autocomplete-input::placeholder {
+    color: #888;
+}
+.dark .autocomplete-container #autocomplete-results {
+    background-color: #2a2a2a;
+    border-color: #666;
+}
+.dark .autocomplete-container #autocomplete-results li {
+    background-color: #2a2a2a;
+    border-bottom-color: #444;
+}
+.dark .autocomplete-container #autocomplete-results li:hover {
+    background-color: #3a3a3a;
+}
+.dark #requests pre {
+    background-color: #1a1a1a !important;
+    color: #e0e0e0;
+    border: 1px solid #444;
+}
+.dark #requests a,
+.dark #requests button {
+    opacity: 0.9;
+}
+.dark #requests a:hover,
+.dark #requests button:hover {
+    opacity: 1;
+    filter: brightness(1.1);
+}
 #toptextinfo {
   display: flex;
 }
