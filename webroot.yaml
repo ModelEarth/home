@@ -1,0 +1,347 @@
+# =============================================================================
+# webroot.yaml — Platform-neutral config standard
+# Site config lives here. Secrets live in .env
+#
+# Platform        Files replaced
+# ──────────────  ──────────────────────────────────────────
+# Netlify         netlify.toml, _redirects, _headers
+# Vercel          vercel.json + next.config.js (hosting layer)
+# Firebase        firebase.json (hosting section)
+# Cloudflare      _headers, _redirects, wrangler.toml (routing)
+#
+# FALLBACK CHAIN (for build time, javascript or by your CLI tool):
+#   1. {webroot}/webroot.yaml         ← site-specific overrides
+#   2. {webroot}/home/webroot.yaml    ← shared team-wide defaults (this file)
+#   3. {webroot}/{repo}/webroot.yaml  ← shared code starter defaults
+
+
+# For upcoming https://github.com/garmartirosy/pipeline
+pipeline: data-pipeline/nodes.csv
+
+# SITES — all sites sharing this webroot; default indicates the active site
+default: model.earth
+
+sites:
+  dreamstudio:
+    title: "DreamStudio"
+    base_url: "https://dreamstudio.com"
+    domain_contains: "dreamstudio.com,planet.live"
+    favicon: "/localsite/img/logo/dreamstudio/favicon.png"
+    visibility: "local"
+  model.earth:
+    title: "Model Earth"
+    base_url: "https://model.earth"
+    favicon: "/localsite/img/logo/modelearth/model-earth.png"
+  model.africa:
+    title: "Model Africa"
+    base_url: "https://model.earth"
+  model.europe:
+    title: "Model Europe"
+    base_url: "https://model.earth"
+  model.canada:
+    title: "Model Canada"
+    base_url: "https://model.earth"
+  model.china:
+    title: "Model China"
+    base_url: "https://model.earth"
+  model.india:
+    title: "Model India"
+    base_url: "https://model.earth"
+  model.usa:
+    title: "Model USA"
+    base_url: "https://model.earth"
+  model.georgia:
+    title: "Model Georgia"
+    base_url: "https://model.georgia.org"
+    domain_contains: "model.georgia.org"
+    favicon: "/localsite/img/logo/states/GA-favicon.png"
+    sideNavLocal: false
+    sideNavLive: false
+  model.maine:
+    title: "Model Maine"
+    base_url: "https://model.earth"
+  neighborhood.org:
+    title: "Neighborhood"
+    base_url: "https://neighborhood.org"
+    domain_contains: "neighborhood.org"
+    favicon: "/localsite/img/logo/neighborhood/favicon.png"
+    visibility: "local"
+  democracylab:
+    title: "DemocracyLab"
+    base_url: "https://democracylab.org"
+    domain_contains: "democracylab"
+    favicon: "/localsite/img/logo/democracylab/favicon.png"
+    visibility: "local"
+
+# yaml-language-server: $schema=https://unpkg.com/@sveltia/cms/schema/sveltia-cms.json
+
+app_title: Edit My Page
+
+backend:
+  name: github
+  repo: modelearth/webroot
+
+media_folder: /public/media
+public_folder: /media
+
+collections:
+  - name: posts
+    label: Posts
+    label_singular: Post
+    folder: /content/posts
+    fields:
+      - { label: Title, name: title, widget: string }
+      - { label: Date, name: date, widget: datetime, type: date }
+      - { label: Body, name: body, widget: richtext }
+
+# THe above works in Sveltia CMS, but Loren is still working on this ...    
+
+# CMS — Netlify-Decap-Sveltia runtime config
+# Values are injected into config.yaml at deploy time, keeping webroot.yaml
+# the single source of truth for both hosting and CMS behavior.
+cms:
+  app_title: "Site Editor"
+  inline_editor: true
+  logo:
+    show_in_header: false
+    show_in_intro: false
+  extra_css:
+    - "/localsite/css/base.css"
+  extra_js:
+    - "/localsite/js/localsite.js?showheader=true&showsearch=false"
+  # Short TTL so editors receive config updates quickly.
+  # Emitted as Cache-Control max-age on /config.yaml in the headers section.
+  config_cache_ttl: 60
+
+
+# BUILD — Equivalent to [build] in netlify.toml and buildCommand/outputDirectory in vercel.json
+build:
+  command: ""           # e.g. "npm run build" — empty = no build step
+  publish: "."          # output dir: "dist", "build", "out", or "." for static
+  base: ""              # monorepo subdir — empty = repo root
+  node_version: "20"
+  ignore:
+    - ".env"
+    - ".env.*"
+    - "firebase.json"
+    - "webroot.yaml"
+    - "**/.*"
+    - "**/node_modules/**"
+    - "**/docker-compose*.yml"
+    - "**/__pycache__/**"
+    - "**/target/**"
+    - "**/Dockerfile*"
+
+  # Context-specific overrides — mirrors netlify.toml [context.*]
+  contexts:
+    production:
+      command: ""
+    preview:
+      command: ""
+    branch:
+      command: ""
+
+
+# HOSTING BEHAVIOR
+hosting:
+  clean_urls: true        # serve /about instead of /about.html
+  trailing_slash: false   # strip trailing slashes
+  spa_fallback: true      # serve index.html for unmatched routes
+  spa_fallback_file: "/index.html"
+
+
+# REDIRECTS — equivalent to [[redirects]] in netlify.toml and "redirects" in vercel.json
+#
+# Fields:
+#   from        source path (supports :splat and * wildcards)
+#   to          destination path or full URL
+#   status      HTTP status (301, 302, 200 for rewrite/proxy)
+#   force       redirect even when source file exists (Netlify: force=true)
+#   conditions  optional map, e.g. branch, cookie, country
+redirects:
+
+  - from: "/admin"
+    to: "/admin/index.html"
+    status: 301
+
+  - from: "/index.html"
+    to: "/"
+    status: 301
+
+  # Proxy /localsite/* to shared localsite origin.
+  # Remove if localsite is served via rewrite below instead.
+  - from: "/localsite/:splat"
+    to: "https://example.com/localsite/:splat"
+    status: 302
+
+  # Branch-specific redirect example — only active on staging branch.
+  # - from: "/api/*"
+  #   to: "https://staging-api.example.com/:splat"
+  #   status: 200
+  #   conditions:
+  #     branch: "staging"
+
+
+# REWRITES — proxy rules (status 200, URL unchanged in browser)
+# Equivalent to rewrite entries in netlify.toml and vercel.json.
+# Listed after redirects; redirects take precedence.
+rewrites:
+
+  # Proxy /localsite/* so the CMS can load extra_css and extra_js at runtime.
+  - from: "/localsite/*"
+    to: "https://example.com/localsite/:splat"
+    status: 200
+
+  # Token-vending microservice — keeps API keys out of client-side code.
+  - from: "/api/token/*"
+    to: "function:tokenVendor"
+    status: 200
+
+  # SPA fallback — must be last.
+  - from: "/*"
+    to: "/index.html"
+    status: 200
+    spa_fallback: true    # hint to emitters: skip if hosting.spa_fallback handles it
+
+
+# HEADERS — equivalent to [[headers]] in netlify.toml and "headers" in vercel.json
+#
+# Fields:
+#   for       path pattern (supports wildcards)
+#   values    map of header key → value
+headers:
+
+  # Security headers for all routes
+  - for: "/**"
+    values:
+      X-Frame-Options: "SAMEORIGIN"
+      X-Content-Type-Options: "nosniff"
+      X-XSS-Protection: "1; mode=block"
+      Referrer-Policy: "strict-origin-when-cross-origin"
+      Permissions-Policy: "geolocation=(), microphone=(), camera=()"
+      Strict-Transport-Security: "max-age=31536000; includeSubDomains; preload"
+      Content-Security-Policy: >-
+        default-src 'self';
+        script-src 'self' 'unsafe-inline' 'unsafe-eval'
+          https://cdn.jsdelivr.net https://unpkg.com;
+        style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+        font-src 'self' https://fonts.gstatic.com;
+        img-src 'self' data: https:;
+        connect-src 'self' https://api.github.com;
+
+  # Long cache for versioned/hashed static assets
+  - for: "/static/**"
+    values:
+      Cache-Control: "public, max-age=31536000, immutable"
+
+  # Fonts — long cache + open CORS for cross-origin font loading
+  - for: "/fonts/**"
+    values:
+      Cache-Control: "public, max-age=31536000, immutable"
+      Access-Control-Allow-Origin: "*"
+
+  # Service worker — always revalidate
+  - for: "/sw.js"
+    values:
+      Cache-Control: "public, max-age=0, must-revalidate"
+
+  # CMS admin panel — no indexing, no caching
+  - for: "/admin/**"
+    values:
+      X-Robots-Tag: "noindex, nofollow"
+      Cache-Control: "no-store"
+
+  # CMS config — short cache so editors receive updates quickly
+  - for: "/config.yaml"
+    values:
+      Cache-Control: "public, max-age=60, must-revalidate"
+      Content-Type: "application/yaml"
+
+  # Data files — moderate cache + open CORS for cross-repo data loading
+  - for: "/**/*.{json,csv,yaml,yml}"
+    values:
+      Cache-Control: "public, max-age=300, stale-while-revalidate=600"
+      Access-Control-Allow-Origin: "*"
+
+  # API responses — no cache, open CORS for JAMstack fetch calls
+  - for: "/api/**"
+    values:
+      Cache-Control: "no-store"
+      Access-Control-Allow-Origin: "*"
+      Access-Control-Allow-Methods: "GET, POST, OPTIONS"
+      Access-Control-Allow-Headers: "Content-Type, Authorization"
+
+  # SharedArrayBuffer support for WASM / collaborative embeds
+  - for: "/embed/**"
+    values:
+      Cross-Origin-Embedder-Policy: "require-corp"
+      Cross-Origin-Opener-Policy: "same-origin"
+
+
+# -----------------------------------------------------------------------------
+# FUNCTIONS
+# Serverless function configuration.
+# Equivalent to [functions] in netlify.toml and "functions" in vercel.json.
+# -----------------------------------------------------------------------------
+functions:
+  directory: "functions"
+  runtime: "nodejs20"
+  routes:
+    - match: "/api/token/**"
+      name: "tokenVendor"
+      max_duration: 10      # seconds
+      memory: 256           # MB
+
+
+# AUTH — shared sign-in UI and OAuth API, hosted in the chat repo.
+# See chat/auth/README.md for architecture, URL resolution, and the /chat prefix.
+# Secrets belong in .env, not here.
+auth:
+  enabled: true
+  source_repo: "chat"
+  modal_url_development: "/chat/auth/js/auth-modal.js"
+  modal_url_production: "https://modelearth.vercel.app/auth/js/auth-modal.js"
+  plugin_url_development: "/chat/auth/js/auth-plugin.js"
+  plugin_url_production: "https://modelearth.vercel.app/auth/js/auth-plugin.js"
+  # API runs on port 3700 (Node server), never on a static file server port.
+  api_url_development: "http://localhost:3700/api"
+  api_url_production: "https://modelearth.vercel.app/api"
+
+
+# ENVIRONMENT — non-secret variables safe to commit
+# Secrets belong in .env — never in webroot.yaml.
+# Equivalent to [build.environment] in netlify.toml and "env" in vercel.json.
+environment:
+  production:
+    NODE_ENV: "production"
+    SITE_ENV: "production"
+  preview:
+    NODE_ENV: "development"
+    SITE_ENV: "preview"
+  development:
+    NODE_ENV: "development"
+    SITE_ENV: "local"
+
+
+# DEV SERVER — equivalent to [dev] in netlify.toml and devCommand in vercel.json
+dev:
+  port: 8887
+  target_port: 3000       # port your framework dev server runs on
+  command: ""             # e.g. "npm run dev" — empty = static file server
+
+
+# I18N — internationalization (disabled by default)
+i18n:
+  enabled: false
+  default_locale: "en"
+  locales:
+    - "en"
+  root: "/en"
+
+
+# PLUGINS — equivalent to [[plugins]] in netlify.toml
+plugins: []
+# plugins:
+#   - package: "@org/webroot-plugin-sitemap"
+#     inputs:
+#       base_url: "https://example.com"
