@@ -14,13 +14,13 @@ A platform-neutral deployment configuration standard for static and JAMstack sit
 ## Location
 
 The file now lives at `{webroot}/support/site/config.yaml` (it was `home/webroot.yaml`).
-localsite reads only that path, with no fallback to `/webroot.yaml`, `home/` or `docker/`. Secrets always live in `.env` — never in `webroot.yaml`.
+localsite reads only that path, with no fallback to `/webroot.yaml`, `home/` or `docker/`. Secrets always live in `.env` — never in `support/site/config.yaml`.
 
 ---
 
 ## Emitter CLI
 
-A `webroot` CLI tool reads `webroot.yaml` and emits the correct platform-specific file:
+A `webroot` CLI tool reads `support/site/config.yaml` and emits the correct platform-specific file:
 
 ```bash
 npx webroot emit --target netlify     # writes netlify.toml
@@ -34,7 +34,7 @@ Options:
 | Flag | Description |
 |---|---|
 | `--target` | Platform to emit for (required) |
-| `--config` | Path to `webroot.yaml` (default: auto-resolved via fallback chain) |
+| `--config` | Path to the site config (default: `support/site/config.yaml`) |
 | `--out` | Output directory (default: repo root) |
 | `--dry-run` | Print output without writing files |
 
@@ -44,7 +44,7 @@ Options:
 
 ### `site`
 
-Top-level site identity. Override in each repo's `webroot.yaml`.
+Top-level site identity. Override in each repo's `support/site/config.yaml`.
 
 | Field | Type | Description |
 |---|---|---|
@@ -57,7 +57,7 @@ Top-level site identity. Override in each repo's `webroot.yaml`.
 
 ### `cms`
 
-Runtime config for Sveltia CMS / Decap CMS. Values are injected into `config.yaml` at deploy time, making `webroot.yaml` the single source of truth for both hosting and CMS behavior.
+Runtime config for Sveltia CMS / Decap CMS. Values are injected into `config.yaml` at deploy time, making `support/site/config.yaml` the single source of truth for both hosting and CMS behavior.
 
 | Field | Type | Description |
 |---|---|---|
@@ -228,6 +228,6 @@ plugins:
 
 **Why not JSON?** No comment support. Comments are load-bearing in a config standard meant to be read and edited by humans.
 
-**Emitter, not runtime.** `webroot.yaml` is a build-time source of truth, not a runtime config format. Platform-specific files are generated from it and committed or written during CI. This means existing platform tooling (Netlify CLI, Vercel CLI, Firebase CLI) continues to work unchanged.
+**Emitter, not runtime.** `support/site/config.yaml` is a build-time source of truth, not a runtime config format. Platform-specific files are generated from it and committed or written during CI. This means existing platform tooling (Netlify CLI, Vercel CLI, Firebase CLI) continues to work unchanged.
 
-**Relationship to `.env`.** `webroot.yaml` is the public half of site configuration. `.env` is the private half. Neither replaces the other.
+**Relationship to `.env`.** `support/site/config.yaml` is the public half of site configuration. `.env` is the private half. Neither replaces the other.
