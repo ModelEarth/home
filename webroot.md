@@ -11,16 +11,10 @@ A platform-neutral deployment configuration standard for static and JAMstack sit
 
 ---
 
-## Fallback chain
+## Location
 
-At build time, a webroot-aware tool resolves config by merging in priority order:
-
-```
-{webroot}/webroot.yaml         ← site-specific overrides (highest priority)
-{webroot}/home/webroot.yaml    ← shared org-wide defaults
-```
-
-Site-specific repos only need their own `webroot.yaml` when they override defaults. Secrets always live in `.env` — never in `webroot.yaml`.
+The file now lives at `{webroot}/support/site/config.yaml` (it was `home/webroot.yaml`).
+localsite reads only that path, with no fallback to `/webroot.yaml`, `home/` or `docker/`. Secrets always live in `.env` — never in `webroot.yaml`.
 
 ---
 
