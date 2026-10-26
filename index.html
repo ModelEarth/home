@@ -533,6 +533,31 @@ Add a swoop like: https://contra.com/p/cRk36Noe-humify-website-design
 
 <object type="text/html" class="swiper-section" data="/swiper/dist/index.html" scrolling="no"></object>
 
+<div id="nasaDay" class="content contentpadding" style="display:none; padding-top:16px">
+  <div id="nasaDayDate" style="font-size:14px; opacity:0.7"></div>
+  <h3 id="nasaDayTitle" style="margin:4px 0"></h3>
+  <div id="nasaDayCredit" style="font-size:14px; opacity:0.7"></div>
+  <p><span id="nasaDayExplanation"></span><span id="nasaDayLinkWrap"> — <a id="nasaDayLink" target="_blank" rel="noopener noreferrer">NASA Science</a></span></p>
+</div>
+<script>
+// The swiper posts the APOD day of its centered slide.
+window.addEventListener("message", (event) => {
+  const day = event.data;
+  if (event.origin !== window.location.origin || !day || day.source !== "nasa-swiper") return;
+  const date = day.date ? new Date(day.date + "T00:00:00Z").toLocaleDateString("en-US", { timeZone: "UTC", year: "numeric", month: "long", day: "numeric" }) : "";
+  document.getElementById("nasaDayDate").textContent = ["NASA Astronomy Picture of the Day", date].filter(Boolean).join(" · ");
+  document.getElementById("nasaDayTitle").textContent = day.title || "";
+  const credit = (day.copyright || "").replace(/\s+/g, " ").trim();
+  document.getElementById("nasaDayCredit").textContent = credit ? "Credit: " + credit : "";
+  document.getElementById("nasaDayExplanation").textContent = day.explanation || "";
+  const link = document.getElementById("nasaDayLink");
+  const isNasaLink = /^https:\/\/science\.nasa\.gov\//.test(day.permalink || "");
+  document.getElementById("nasaDayLinkWrap").style.display = isNasaLink ? "" : "none";
+  if (isNasaLink) link.href = day.permalink;
+  document.getElementById("nasaDay").style.display = "block";
+});
+</script>
+
 <div class="content contentpadding large-list" >
   <div id="readmeDiv"></div>
 </div>
