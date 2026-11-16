@@ -614,12 +614,13 @@ window.addEventListener("message", (event) => {
   if (isNasaLink) link.href = day.permalink;
   document.getElementById("nasaDay").style.display = "block";
   // For the "Ask an SI" prompt in localsite/js/montage-prompt.js. The "NASA Astronomy Picture of the Day" intro is left out.
-  window.nasaDayPrompt = { date: date, title: day.title || "", credit: credit, explanation: day.explanation || "", permalink: isNasaLink ? day.permalink : "" };
-  document.dispatchEvent(new CustomEvent("nasaDayChange"));
-  // A clicked slide opens the "Ask an SI" prompt with the picture beside it (localsite/js/montage-prompt.js)
+  // url and mediaType are for the picture shown to the right of the prompt
+  window.nasaDayPrompt = { date: date, title: day.title || "", credit: credit, explanation: day.explanation || "", permalink: isNasaLink ? day.permalink : "", url: day.url || "", mediaType: day.media_type || "" };
+  // A clicked slide opens the "Ask an SI" prompt with the picture beside it, and starts a video (localsite/js/montage-prompt.js)
   if (day.action === "select" && typeof window.showLlmPromptImage === "function") {
-    window.showLlmPromptImage({ url: day.url, title: day.title || "", mediaType: day.media_type });
+    window.showLlmPromptImage({ url: day.url, title: day.title || "", mediaType: day.media_type, autoplay: true });
   }
+  document.dispatchEvent(new CustomEvent("nasaDayChange"));
 });
 </script>
 
