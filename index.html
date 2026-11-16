@@ -332,6 +332,53 @@ Add a swoop like: https://contra.com/p/cRk36Noe-humify-website-design
       background-color: #e3e3e3;
       background-color: #eee;
     }
+    /* Locations legend between the two charts, built by buildTimelineBottomLegend() in localsite/js/earthscape.js.
+       Matches the #bottom-legend on localsite/timeline/ */
+    #bottom-legend {
+      display: none;
+      flex-wrap: wrap;
+      gap: 4px 8px;
+      align-items: center;
+      justify-content: center;
+      margin: -8px 0 12px 0;
+    }
+    .bottom-legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 8px;
+      border-radius: 6px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .bottom-legend-item:hover { background: rgba(0,0,0,0.05); }
+    .bottom-legend-item.hidden { opacity: 0.45; }
+    .bottom-legend-item .legend-swatch {
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
+      flex: 0 0 auto;
+    }
+    .bottom-legend-item .legend-label {
+      max-width: 12em;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .bottom-legend-collapsed .bottom-legend-item.extra { display: none; }
+    .bottom-legend-more {
+      display: inline-flex;
+      padding: 4px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      color: #0066ff;
+      font-weight: 700;
+      border: 1px solid rgba(0,102,255,0.9);
+      user-select: none;
+    }
+    .bottom-legend-more:hover { background: rgba(0,102,255,0.06); }
+    .dark .bottom-legend-item:hover { background: rgba(255,255,255,0.08); }
+    .dark .bottom-legend-more { color: #69a5ff; border-color: rgba(105,165,255,0.9); }
+    .dark .bottom-legend-more:hover { background: rgba(105,165,255,0.12); }
     </style>
 
     <!-- Also update in localsite/timeline/
@@ -503,6 +550,8 @@ Add a swoop like: https://contra.com/p/cRk36Noe-humify-website-design
         <canvas id="timelineChart"></canvas>
     </div>
 
+    <div id="bottom-legend" class="bottom-legend"><!-- Filled by buildTimelineBottomLegend() in localsite/js/earthscape.js --></div>
+
     <div id="div2" class="toggleDiv">
         <canvas id="lineAreaChart"></canvas>
     </div>
@@ -531,16 +580,25 @@ Add a swoop like: https://contra.com/p/cRk36Noe-humify-website-design
     });
 </script>
 
-<object type="text/html" class="swiper-section" data="/swiper/dist/index.html" scrolling="no"></object>
+<!-- select=parent: a slide click shows the picture beside the "Ask an SI" prompt instead of opening a new tab -->
+<object type="text/html" class="swiper-section" data="/swiper/dist/index.html?select=parent" scrolling="no"></object>
 
-<div id="nasaDay" class="content contentpadding" style="display:none; padding-top:16px">
+<style>
+/* The "Ask an SI" prompt repeats this text, so it hides while the prompt is open */
+body.llm-prompt-open #nasaDay { display: none !important; }
+</style>
+<div id="nasaDay" class="content contentpadding" style="display:none; padding-top:16px; padding-bottom:0">
   <div id="nasaDayDate" style="font-size:14px; opacity:0.7"></div>
   <h3 id="nasaDayTitle" style="margin:4px 0"></h3>
   <div id="nasaDayCredit" style="font-size:14px; opacity:0.7"></div>
   <p><span id="nasaDayExplanation"></span><span id="nasaDayLinkWrap"> — <a id="nasaDayLink" target="_blank" rel="noopener noreferrer">NASA Science</a></span></p>
 </div>
+
+<div class="content contentpadding" style="padding-top:0; padding-bottom:0">
+  <div id="llmPromptHolder"><!-- "Ask an SI" from localsite/js/montage-prompt.js --></div>
+</div>
 <script>
-// The swiper posts the APOD day of its centered slide.
+// The swiper posts the APOD day of its centered slide, and a clicked slide with action: "select".
 window.addEventListener("message", (event) => {
   const day = event.data;
   if (event.origin !== window.location.origin || !day || day.source !== "nasa-swiper") return;
@@ -555,6 +613,13 @@ window.addEventListener("message", (event) => {
   document.getElementById("nasaDayLinkWrap").style.display = isNasaLink ? "" : "none";
   if (isNasaLink) link.href = day.permalink;
   document.getElementById("nasaDay").style.display = "block";
+  // For the "Ask an SI" prompt in localsite/js/montage-prompt.js. The "NASA Astronomy Picture of the Day" intro is left out.
+  window.nasaDayPrompt = { date: date, title: day.title || "", credit: credit, explanation: day.explanation || "", permalink: isNasaLink ? day.permalink : "" };
+  document.dispatchEvent(new CustomEvent("nasaDayChange"));
+  // A clicked slide opens the "Ask an SI" prompt with the picture beside it (localsite/js/montage-prompt.js)
+  if (day.action === "select" && typeof window.showLlmPromptImage === "function") {
+    window.showLlmPromptImage({ url: day.url, title: day.title || "", mediaType: day.media_type });
+  }
 });
 </script>
 
@@ -601,7 +666,8 @@ document.addEventListener('hashChangeEvent', function (elem) {
     if (!hash.scope) {
         hash.scope = "country"; // CUSTOM - country on home page
     }
-    if (hash.scope != priorHash.scope || hash.goal != priorHash.goal) {
+    // Compare with the scope and goal last loaded, as localsite/timeline/ does. priorHash starts with the include's scope=country.
+    if (hash.scope + '|' + (hash.goal || '') !== window._timelineSheetView) {
         const selectScope = document.getElementById("selectScope");
         if (selectScope) {
           selectScope.value = hash.scope;
