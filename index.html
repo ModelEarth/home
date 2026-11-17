@@ -138,6 +138,7 @@ param.website = "dreamstudio"
   }
 }
 .swiper-section {
+  display: block; /* An inline <object> leaves a strip of page background below it */
   height: 477px;
   width: 100%;
   overflow: hidden;
@@ -653,7 +654,21 @@ Add a swoop like: https://contra.com/p/cRk36Noe-humify-website-design
 <style>
 /* The "Ask an SI" prompt repeats this text, so it hides while the prompt is open */
 body.llm-prompt-open #nasaDay { display: none !important; }
+/* NASA picture details and "Ask an SI", slightly darker than the swiper above (#eee, and #444 in dark mode) */
+#askSection {
+  background-color: #e6e6e6;
+  padding-top: 10px;
+  padding-bottom: 24px;
+}
+.dark #askSection {
+  background-color: #3c3c3c;
+}
+/* Until the NASA text shows, the "Ask an SI" button sits 24px down, matching the space below it */
+#nasaDay[style*="none"] + #llmPromptRow {
+  padding-top: 14px !important;
+}
 </style>
+<div id="askSection">
 <div id="nasaDay" class="content contentpadding" style="display:none; padding-top:16px; padding-bottom:0">
   <div id="nasaDayDate" style="font-size:14px; opacity:0.7"></div>
   <h3 id="nasaDayTitle" style="margin:4px 0"></h3>
@@ -661,9 +676,10 @@ body.llm-prompt-open #nasaDay { display: none !important; }
   <p><span id="nasaDayExplanation"></span><span id="nasaDayLinkWrap"> — <a id="nasaDayLink" target="_blank" rel="noopener noreferrer">NASA Science</a></span></p>
 </div>
 
-<div class="content contentpadding" style="padding-top:0; padding-bottom:0">
+<div id="llmPromptRow" class="content contentpadding" style="padding-top:0; padding-bottom:0">
   <div id="llmPromptHolder"><!-- "Ask an SI" from localsite/js/montage-prompt.js --></div>
 </div>
+</div><!-- /askSection -->
 <script>
 // The swiper posts the APOD day of its centered slide, and a clicked slide with action: "select".
 window.addEventListener("message", (event) => {
